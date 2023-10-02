@@ -14,5 +14,5 @@ body {
 }
 
 .transparent {
-  background-image: url('https://www.discordicon.com/_next/static/media/transparent_bg.531a9fc6.svg');
+  background-image: url('../public/transparent.png');
 }
