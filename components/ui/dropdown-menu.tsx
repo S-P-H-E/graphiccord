@@ -18,6 +18,8 @@ const DropdownMenuTrigger = React.forwardRef<HTMLButtonElement, React.ComponentP
   )
 )
 
+DropdownMenuTrigger.displayName = "DropdownMenuTrigger";
+
 const DropdownMenuGroup = DropdownMenuPrimitive.Group
 
 const DropdownMenuPortal = DropdownMenuPrimitive.Portal

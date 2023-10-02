@@ -29,33 +29,36 @@ interface Icon {
 
 export default function BadgeEditor(){
     const [bgColor, setBgColor] = useState<string>("#000000");
-  const [color, setColor] = useState<string>("#ffffff");
-  const [badgeText, setBadgeText] = useState<string>("DISCORD");
-  const [badgeRound, setBadgeRound] = useState<string>("40");
-  const [textSpacing, setTextSpacing] = useState<number>(1);
-  const [isIconVisible, setIconVisibility] = useState<boolean>(true);
-  const [isIconMenuVisible, setIconMenuVisibility] = useState<boolean>(false);
-  const [iconSearch, setIconSearch] = useState<string>("");
+    const [color, setColor] = useState<string>("#ffffff");
+    const [badgeText, setBadgeText] = useState<string>("DISCORD");
+    const [badgeRound, setBadgeRound] = useState<string>("40");
+    const [textSpacing, setTextSpacing] = useState<number>(1);
+    const [isIconVisible, setIconVisibility] = useState<boolean>(true);
+    const [isIconMenuVisible, setIconMenuVisibility] = useState<boolean>(false);
+    const [iconSearch, setIconSearch] = useState<string>("");
 
-  useEffect(() => {
-    adjustWidth();
-}, [badgeText, isIconVisible]);
+    useEffect(() => {
+        adjustWidth();
+    }, [badgeText, isIconVisible]);
 
-const adjustWidth = () => {
-    const captureDiv = document.getElementById("capture");
+    const adjustWidth = () => {
+        const captureDiv = document.getElementById("capture");
 
-    // Temporarily reset the width to natural content width
-    captureDiv.style.width = 'auto';
+        if (captureDiv) { // Check if captureDiv is not null
+            // Temporarily reset the width to natural content width
+            captureDiv.style.width = 'auto';
 
-    // Calculate the width of the content inside the "capture" div
-    const contentWidth = captureDiv.scrollWidth;
+            // Calculate the width of the content inside the "capture" div
+            const contentWidth = captureDiv.scrollWidth;
 
-    // Round the width to the nearest multiple of 32px
-    const roundedWidth = Math.ceil(contentWidth / 32) * 32;
+            // Round the width to the nearest multiple of 32px
+            const roundedWidth = Math.ceil(contentWidth / 32) * 32;
 
-    // Set the width of the "capture" div to the rounded value
-    captureDiv.style.width = `${roundedWidth}px`;
-};
+            // Set the width of the "capture" div to the rounded value
+            captureDiv.style.width = `${roundedWidth}px`;
+        }
+    };
+
 
 
 
