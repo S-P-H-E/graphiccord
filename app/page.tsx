@@ -53,54 +53,47 @@ export default function Home() {
     
     if (node) {
       const blob = await domtoimage.toBlob(node);
-      // Continue with the rest of your code that uses the blob
-  } else {
-      // Handle the case where node is null, maybe show an error message or take some other action
-  }
-  
-    const img = new window.Image();
+      const img = new window.Image();
 
-    let blob: Blob | null = null;
-
-    if (node) {
-        blob = await domtoimage.toBlob(node);
-    }
-    
-    await new Promise(resolve => img.onload = resolve);
-    
-    const totalWidth = img.width;
-    const height = img.height;
-    const partWidth = 64; // Each part will be 64 pixels wide
-    const numberOfParts = Math.ceil(totalWidth / partWidth); // Calculate the number of parts
-    const extraWidth = totalWidth % partWidth; // Calculate extra width
-    const addedWidthPerPart = Math.floor(extraWidth / numberOfParts); // Distribute extra width equally
-    
-    const blobs = [];
-    
-    for (let i = 0; i < numberOfParts; i++) {
-      const tempCanvas = document.createElement('canvas');
-      const currentPartWidth = partWidth + addedWidthPerPart;
+      img.src = URL.createObjectURL(blob);
       
-      tempCanvas.width = currentPartWidth;
-      tempCanvas.height = height;
-      const ctx = tempCanvas.getContext('2d');
-      if (ctx) {
-        ctx.drawImage(img, i * currentPartWidth, 0, currentPartWidth, height, 0, 0, currentPartWidth, height);
+      await new Promise(resolve => img.onload = resolve);
+      
+      const totalWidth = img.width;
+      const height = img.height;
+      const partWidth = 64; // Each part will be 64 pixels wide
+      const numberOfParts = Math.ceil(totalWidth / partWidth); // Calculate the number of parts
+      const extraWidth = totalWidth % partWidth; // Calculate extra width
+      const addedWidthPerPart = Math.floor(extraWidth / numberOfParts); // Distribute extra width equally
+      
+      const blobs = [];
+      
+      for (let i = 0; i < numberOfParts; i++) {
+        const tempCanvas = document.createElement('canvas');
+        const currentPartWidth = partWidth + addedWidthPerPart;
+        
+        tempCanvas.width = currentPartWidth;
+        tempCanvas.height = height;
+        const ctx = tempCanvas.getContext('2d');
+        
+        if (ctx) {
+          ctx.drawImage(img, i * currentPartWidth, 0, currentPartWidth, height, 0, 0, currentPartWidth, height);
+          const partBlob = await new Promise(resolve => tempCanvas.toBlob(resolve));
+          blobs.push(partBlob);
+        }
       }
-      const partBlob = await new Promise(resolve => tempCanvas.toBlob(resolve));
-      blobs.push(partBlob);
+      
+      const zip = new JSZip();
+      blobs.forEach((blob, index) => {
+        zip.file(`${index + 1}.png`, blob as Blob);
+      });
+      
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      saveAs(zipBlob, badgeText + ".zip");
     }
-    
-    const zip = new JSZip();
-    blobs.forEach((blob, index) => {
-      zip.file(`${index + 1}.png`, blob as Blob);
-    });
-    
-    const zipBlob = await zip.generateAsync({ type: "blob" });
-    saveAs(zipBlob, badgeText + ".zip");
   }
 
-  const icons: Icon[] = [
+  const icons = [
     {
       id: 1,
       icon: <BsYoutube size={25}/>,
@@ -234,7 +227,6 @@ export default function Home() {
             <div className='h-[100px] flex flex-col flex-wrap items-start'>
               {icons.filter(icon => icon.name.toLowerCase().includes(iconSearch.toLowerCase())).map((icon) => (
                 <div 
-                key={icon.id}
                   className='border border-[#353639] rounded-md p-1 m-1 cursor-pointer transition-all hover:bg-white/10 w-fit'
                   onClick={() => {
                     setSelectedIcon(icon.icon);
