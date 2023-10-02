@@ -1,113 +1,257 @@
+"use client"
+import clsx from 'clsx';
 import Image from 'next/image'
+import { useState, useRef } from 'react';
+import { HexColorPicker } from "react-colorful";
+import { CgColorPicker } from 'react-icons/cg'
+import domtoimage from 'dom-to-image';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
+import { Switch } from "@/components/ui/switch"
+import { BsYoutube, BsInstagram, BsFillLightningChargeFill, BsStars, BsFillCloudFill, BsFillCursorFill, BsFillEyeFill, BsFillPersonFill } from 'react-icons/bs'
+
+interface Icon {
+  id: number;
+  icon: JSX.Element;
+  name: string;
+}
 
 export default function Home() {
+  const [bgColor, setBgColor] = useState<string>("#8ea0c1");
+  const [color, setColor] = useState<string>("#ffffff");
+  const [badgeText, setBadgeText] = useState<string>("graphiccord");
+  const [badgeRound, setBadgeRound] = useState<string>("40");
+  const [isIconVisible, setIconVisibility] = useState<boolean>(true);
+  const [isIconMenuVisible, setIconMenuVisibility] = useState<boolean>(false);
+  const [iconSearch, setIconSearch] = useState<string>("");
+
+  const [activePicker, setActivePicker] = useState<string | null>(null);
+
+  const bgPickerRef = useRef<HTMLDivElement>(null);
+  const textPickerRef = useRef<HTMLDivElement>(null);
+  const bgIconRef = useRef<HTMLDivElement>(null);
+  const textColorIconRef = useRef<HTMLDivElement>(null);
+
+  const toggleBgPicker = () => {
+    if (activePicker === 'bg') {
+      setActivePicker(null);
+    } else {
+      setActivePicker('bg');
+    }
+  };
+  
+  const toggleTextPicker = () => {
+    if (activePicker === 'text') {
+      setActivePicker(null);
+    } else {
+      setActivePicker('text');
+    }
+  };
+
+  const downloadDivAsImage = async () => {
+    const node = document.getElementById("capture");
+    
+    if (node) {
+      const blob = await domtoimage.toBlob(node);
+      // Continue with the rest of your code that uses the blob
+  } else {
+      // Handle the case where node is null, maybe show an error message or take some other action
+  }
+  
+    const img = new window.Image();
+
+    let blob: Blob | null = null;
+
+    if (node) {
+        blob = await domtoimage.toBlob(node);
+    }
+    
+    await new Promise(resolve => img.onload = resolve);
+    
+    const totalWidth = img.width;
+    const height = img.height;
+    const partWidth = 64; // Each part will be 64 pixels wide
+    const numberOfParts = Math.ceil(totalWidth / partWidth); // Calculate the number of parts
+    const extraWidth = totalWidth % partWidth; // Calculate extra width
+    const addedWidthPerPart = Math.floor(extraWidth / numberOfParts); // Distribute extra width equally
+    
+    const blobs = [];
+    
+    for (let i = 0; i < numberOfParts; i++) {
+      const tempCanvas = document.createElement('canvas');
+      const currentPartWidth = partWidth + addedWidthPerPart;
+      
+      tempCanvas.width = currentPartWidth;
+      tempCanvas.height = height;
+      const ctx = tempCanvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(img, i * currentPartWidth, 0, currentPartWidth, height, 0, 0, currentPartWidth, height);
+      }
+      const partBlob = await new Promise(resolve => tempCanvas.toBlob(resolve));
+      blobs.push(partBlob);
+    }
+    
+    const zip = new JSZip();
+    blobs.forEach((blob, index) => {
+      zip.file(`${index + 1}.png`, blob as Blob);
+    });
+    
+    const zipBlob = await zip.generateAsync({ type: "blob" });
+    saveAs(zipBlob, badgeText + ".zip");
+  }
+
+  const icons: Icon[] = [
+    {
+      id: 1,
+      icon: <BsYoutube size={25}/>,
+      name: 'YouTube'
+    },
+    {
+      id: 2,
+      icon: <BsInstagram size={25}/>,
+      name: 'Instagram'
+    },
+    {
+      id: 3,
+      icon: <BsFillLightningChargeFill size={25}/>,
+      name: 'Lightning'
+    },
+    {
+      id: 4,
+      icon: <BsStars size={25}/>,
+      name: 'Stars'
+    },
+    {
+      id: 5,
+      icon: <BsFillCloudFill size={25}/>,
+      name: 'Cloud'
+    },
+    {
+      id: 6,
+      icon: <BsFillCursorFill size={25}/>,
+      name: 'Cursor'
+    },
+    {
+      id: 7,
+      icon: <BsFillEyeFill size={25}/>,
+      name: 'Eye'
+    },
+    {
+      id: 8,
+      icon: <BsFillPersonFill size={25}/>,
+      name: 'Person'
+    },
+  ]
+
+  const [selectedIcon, setSelectedIcon] = useState(icons[0].icon);
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <>
+      {/* Navbar */}
+      <div className='flex justify-between p-10'>
+        <div className='flex items-center gap-2'>
+          <Image src={'/logo.svg'} alt='logo' width={25} height={0}/>
+          <h1 className='text-xl font-semibold'>graphiccord</h1>
+        </div>
+        <button className='bg-white text-black font-medium px-3 py-2 rounded-xl'>
+          Donate
+        </button>
+      </div>
+
+      <div className='flex flex-col justify-center items-center '>
+        <div className='py-10 px-1 w-[300px] transparent rounded-xl m-5 flex justify-center'>
+          <div id="capture" className='flex gap-2 px-4 py-1 justify-center items-center min-w-[200px] h-[64px] scale-90' style={{ backgroundColor: bgColor, borderRadius: badgeRound + 'px', color: color }}>
+          {isIconVisible && selectedIcon}
+
+            <h1 className='font-medium text-2xl truncate'>{badgeText}</h1>
+          </div>
+        </div>
+
+        <div className='bg-[#212225] p-4 rounded-xl w-[300px]'>
+          <h1 className='text-[#949EA0] uppercase'>Text</h1>
+          <input 
+            placeholder='Badge Text' 
+            className='bg-[#16171A] rounded-md px-3 py-2 placeholder:text-[#646465] mb-5'
+            value={badgeText} // Set the input value to badgeText
+            onChange={(e) => setBadgeText(e.target.value)} // Update badgeText on input change
+          />
+
+          <h1 className='text-[#949EA0] uppercase'>Rounded</h1>
+          <input 
+            placeholder='0' 
+            className='bg-[#16171A] rounded-md px-3 py-2 placeholder:text-[#646465] mb-5'
+            value={badgeRound} // Set the input value to badgeText
+            onChange={(e) => setBadgeRound(e.target.value)} // Update badgeText on input change
+          />
+
+          <h1 className='text-[#949EA0] uppercase'>Colors</h1>
+
+          <div className='flex gap-2 w-full mt-3'>
+            <div className='w-full' ref={bgPickerRef}>
+              <p className='text-[#7B7B7B] text-sm'>BACKGROUND</p>
+              <div style={{ backgroundColor: bgColor }} className='p-2 flex justify-center rounded-md cursor-pointer' onClick={toggleBgPicker} ref={bgIconRef}>
+                <CgColorPicker />
+              </div>
+              {activePicker === 'bg' && (
+                <div className='absolute my-3'>
+                  <HexColorPicker color={bgColor} onChange={setBgColor}/>
+                </div>
+              )}
+            </div>
+
+            <div ref={textPickerRef}>
+              <p className='text-[#7B7B7B] text-sm'>TEXT</p>
+                <div style={{ backgroundColor: color }} className='p-2 flex justify-center rounded-md cursor-pointer' onClick={toggleTextPicker} ref={textColorIconRef}>
+                  <CgColorPicker />
+                </div>
+              {activePicker === 'text' && (
+                <div className='absolute my-3 right-0 md:right-auto mx-5'>
+                  <HexColorPicker color={color} onChange={setColor}/>
+                </div>
+              )}
+            </div>
+        </div>
+
+        <div className='flex justify-between items-center mt-5'>
+          <div className='flex gap-2'>
+            <h1 className='text-[#949EA0] uppercase'>ICON</h1>
+            <Switch checked={isIconVisible} onCheckedChange={() => setIconVisibility(!isIconVisible)}/>
+          </div>
+
+          <div className='border border-[#353639] rounded-md p-2 cursor-pointer transition-all hover:bg-white/10' onClick={() => setIconMenuVisibility(!isIconMenuVisible)}>
+          {selectedIcon}
+
+          </div>
+
+          <div className={clsx('bg-[#24272b] border border-[#36383B] right-[110px] md:right-[780px] p-2 rounded-xl absolute flex flex-col', 
+            { 'hidden': !isIconMenuVisible })}>
+            <input 
+            placeholder='Search for an icon' 
+            className='bg-[#16171A] rounded-md px-3 py-2 placeholder:text-[#646465] mb-5'
+            value={iconSearch} // Set the input value to badgeText
+            onChange={(e) => setIconSearch(e.target.value)} // Update badgeText on input change
+          />
+            <div className='h-[100px] flex flex-col flex-wrap items-start'>
+              {icons.filter(icon => icon.name.toLowerCase().includes(iconSearch.toLowerCase())).map((icon) => (
+                <div 
+                  className='border border-[#353639] rounded-md p-1 m-1 cursor-pointer transition-all hover:bg-white/10 w-fit'
+                  onClick={() => {
+                    setSelectedIcon(icon.icon);
+                    setIconMenuVisibility(false);  // Close the menu after selecting an icon
+                  }}>
+                  {icon.icon}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <button className='bg-[#5AA55B] w-full p-2 mt-5 rounded-md font-semibold' onClick={downloadDivAsImage}>
+          Download as .zip
+        </button>
+
         </div>
       </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore the Next.js 13 playground.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+    </>
   )
 }
