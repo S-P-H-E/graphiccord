@@ -3,13 +3,14 @@
 @tailwind utilities;
 
 * {
-  --text: #ffffff;
-  --highlight: #80269c;
+  --text: #000000;
+  --highlight: #ffffff;
   --bg: #030104;
 }
 
 body {
-  color: var(--text);
+  -webkit-tap-highlight-color: transparent;
+  color: #ffffff;
   background-color: var(--bg);
 }
 
