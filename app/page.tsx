@@ -227,6 +227,7 @@ export default function Home() {
             <div className='h-[100px] flex flex-col flex-wrap items-start'>
               {icons.filter(icon => icon.name.toLowerCase().includes(iconSearch.toLowerCase())).map((icon) => (
                 <div 
+                key={icon.id}
                   className='border border-[#353639] rounded-md p-1 m-1 cursor-pointer transition-all hover:bg-white/10 w-fit'
                   onClick={() => {
                     setSelectedIcon(icon.icon);
