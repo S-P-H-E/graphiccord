@@ -1,5 +1,6 @@
 import BadgeEditor from '@/components/BadgeEditor/page'
 import Image from 'next/image'
+import Link from 'next/link'
 import { FaCrown } from 'react-icons/fa'
 
 export default function Home() {
@@ -13,9 +14,11 @@ export default function Home() {
           <Image src={'/logo.svg'} alt='logo' width={25} height={0}/>
           <h1 className='text-xl font-semibold text-[--text]'>graphiccord</h1>
         </div>
-        <button className='bg-[--text] text-[--highlight] font-medium px-3 py-2 rounded-xl'>
-          Donate
-        </button>
+        <Link href={'https://www.paypal.com/donate/?hosted_button_id=PCCMMGKQLUN7G'}>
+          <button className='donate'>
+            Donate
+          </button>
+        </Link>
       </div>
 
       <div className='bg-[--highlight] flex flex-col items-center h-[700px]'>
